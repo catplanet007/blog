@@ -35,7 +35,7 @@
 
 
 
-<link href="/blog/sass/main.min.d0e60b60a30353285b94246b15d2e72fbed8bb46112f9bb94a9ea13a228a75a2.css" rel="stylesheet">
+<link href="/blog/sass/main.min.7765b8495578e72bb8dd0c69b327e4daf065ffe8a2c77301caf446372549d1f3.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
 <link rel="stylesheet" href="/blog/css/custom.css">
 
@@ -190,21 +190,21 @@
 </span><span style="color:#75715e"></span><span style="color:#a6e22e">userName</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">user1234</span>.<span style="color:#a6e22e">name</span> <span style="color:#75715e">// hget user:1234 name
 </span></code></pre></div><h3 id="string">string</h3>
 <p><strong>string</strong> 是变长的，会预先分配 <strong>capacity</strong>，最大长度 512M。</p>
-<pre><code class="language-shell:title=set/get/del" data-lang="shell:title=set/get/del">&gt; set name Jack
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; set name Jack
 OK
 &gt; get name
-&quot;Jack&quot;
+<span style="color:#e6db74">&#34;Jack&#34;</span>
 &gt; del name
-(integer) 1 # 1: succeed
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span> <span style="color:#75715e"># 1: succeed</span>
 &gt; get name
-(nil)
-</code></pre><pre><code class="language-shell:title=expire/ttl" data-lang="shell:title=expire/ttl">&gt; set name Jack
+<span style="color:#f92672">(</span>nil<span style="color:#f92672">)</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; set name Jack
 OK
-&gt; expire name 60 # 60s
-(integer) 1
+&gt; expire name <span style="color:#ae81ff">60</span> <span style="color:#75715e"># 60s</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
 &gt; ttl name
-(integer) 50  # 50s to live，-1: hasn't set expire, -2: value not exist
-</code></pre><h4 id="分布式锁">分布式锁</h4>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">50</span>  <span style="color:#75715e"># 50s to live，-1: hasn&#39;t set expire, -2: value not exist</span>
+</code></pre></div><h4 id="分布式锁">分布式锁</h4>
 <p><a href="http://www.redis.cn/commands/set.html">set</a> 命令提供的语意 <code>func(key1 string, key2 string, expireInMilliseconds number, ifNotExist boolean) boolean</code>可以用来实现分布式锁：</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; set lock:user:123 xx-random-123 px <span style="color:#ae81ff">10000</span> nx <span style="color:#75715e"># 设置 10s 失效时间</span>
 OK
@@ -552,7 +552,7 @@ min: 0, max: 1, avg: 0.19 <span style="color:#f92672">(</span><span style="color
 
 
 
-<script type="text/javascript" src="/blog/js/main.min.c12618f9a600c40bd024996677e951e64d3487006775aeb22e200c990006c5c7.js"></script>
+<script type="text/javascript" src="/blog/js/main.min.a0842702715c4a1f2265c518e265651b7b00f5a4f8db649cf5fd983d8dff44d1.js"></script>
   <script type="text/javascript">
     window.MathJax = {
       tex: {
