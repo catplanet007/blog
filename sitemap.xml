@@ -51,7 +51,7 @@
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/post/mysql/mysql-observability/</loc>
+    <loc>https://catplanet007.github.io/blog/post/tech/mysql/mysql-observability/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -79,7 +79,7 @@
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/post/redis/learning-redis/</loc>
+    <loc>https://catplanet007.github.io/blog/post/tech/redis/learning-redis/</loc>
     <lastmod>2020-11-29T23:23:42+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
