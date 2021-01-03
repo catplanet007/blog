@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>学习观测 MySQL - 峡谷见闻</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="catplanet007" /><meta name="description" content="查看连接 show processlist show processlist; &#43;----&#43;------&#43;-----------&#43;--------------------&#43;---------&#43;------&#43;----------&#43;------------------&#43; | Id | User | Host | db | Command | Time | State | Info | &#43;----&#43;------&#43;-----------&#43;--------------------&#43;---------&#43;------&#43;----------&#43;------------------&#43; | 11 | root | localhost | information_schema | Sleep | 9886 | | NULL | | 16 | root | localhost | information_schema | Sleep | 7874 | | NULL | | 18 | root | localhost | test | Query |" /><meta name="keywords" content="mysql, observability" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.79.0 with theme even" />
+
+
+<link rel="canonical" href="https://catplanet007.github.io/blog/post/tech/mysql/mysql-observability/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/blog/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/blog/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/blog/favicon-16x16.png">
+<link rel="manifest" href="/blog/manifest.json">
+<link rel="mask-icon" href="/blog/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/blog/sass/main.min.127436e17cd800e3778a1c040e72bfaaefd2ca14d76b1f70851ccf9b631264e8.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+<link rel="stylesheet" href="/blog/css/custom.css">
+
+
+<meta property="og:title" content="学习观测 MySQL" />
+<meta property="og:description" content="查看连接 show processlist show processlist; &#43;----&#43;------&#43;-----------&#43;--------------------&#43;---------&#43;------&#43;----------&#43;------------------&#43; | Id | User | Host | db | Command | Time | State | Info | &#43;----&#43;------&#43;-----------&#43;--------------------&#43;---------&#43;------&#43;----------&#43;------------------&#43; | 11 | root | localhost | information_schema | Sleep | 9886 | | NULL | | 16 | root | localhost | information_schema | Sleep | 7874 | | NULL | | 18 | root | localhost | test | Query |" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://catplanet007.github.io/blog/post/tech/mysql/mysql-observability/" />
+<meta property="article:published_time" content="2021-01-02T19:54:07+08:00" />
+<meta property="article:modified_time" content="2021-01-02T19:54:07+08:00" />
+<meta itemprop="name" content="学习观测 MySQL">
+<meta itemprop="description" content="查看连接 show processlist show processlist; &#43;----&#43;------&#43;-----------&#43;--------------------&#43;---------&#43;------&#43;----------&#43;------------------&#43; | Id | User | Host | db | Command | Time | State | Info | &#43;----&#43;------&#43;-----------&#43;--------------------&#43;---------&#43;------&#43;----------&#43;------------------&#43; | 11 | root | localhost | information_schema | Sleep | 9886 | | NULL | | 16 | root | localhost | information_schema | Sleep | 7874 | | NULL | | 18 | root | localhost | test | Query |">
+<meta itemprop="datePublished" content="2021-01-02T19:54:07+08:00" />
+<meta itemprop="dateModified" content="2021-01-02T19:54:07+08:00" />
+<meta itemprop="wordCount" content="3110">
+
+
+
+<meta itemprop="keywords" content="mysql,observability," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="学习观测 MySQL"/>
+<meta name="twitter:description" content="查看连接 show processlist show processlist; &#43;----&#43;------&#43;-----------&#43;--------------------&#43;---------&#43;------&#43;----------&#43;------------------&#43; | Id | User | Host | db | Command | Time | State | Info | &#43;----&#43;------&#43;-----------&#43;--------------------&#43;---------&#43;------&#43;----------&#43;------------------&#43; | 11 | root | localhost | information_schema | Sleep | 9886 | | NULL | | 16 | root | localhost | information_schema | Sleep | 7874 | | NULL | | 18 | root | localhost | test | Query |"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/blog/" class="logo">峡谷见闻</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/blog/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/blog/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/blog/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/blog/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/blog/" class="logo">峡谷见闻</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/blog/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/blog/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/blog/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/blog/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">学习观测 MySQL</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-01-02 </span>
+        <div class="post-category">
+            <a href="/blog/categories/mysql/"> mysql </a>
+            <a href="/blog/categories/observability/"> observability </a>
+            </div>
+          <span class="more-meta"> 约 3110 字 </span>
+          <span class="more-meta"> 预计阅读 7 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#查看连接">查看连接</a>
+          <ul>
+            <li><a href="#show-processlist">show processlist</a></li>
+            <li><a href="#innodb_thread_concurrency">innodb_thread_concurrency</a></li>
+            <li><a href="#长事务">长事务</a></li>
+            <li><a href="#查询表锁">查询表锁</a></li>
+            <li><a href="#查询行锁">查询行锁</a></li>
+          </ul>
+        </li>
+        <li><a href="#日志">日志</a>
+          <ul>
+            <li><a href="#general_log">general_log</a></li>
+            <li><a href="#slow_log">slow_log</a></li>
+            <li><a href="#查看-binlog">查看 binlog</a></li>
+            <li><a href="#回滚数据">回滚数据</a></li>
+            <li><a href="#监控-binlogredo-log-io-耗时">监控 binlog/redo log IO 耗时</a></li>
+            <li><a href="#查看主备延迟">查看主备延迟</a></li>
+            <li><a href="#mysqldump">mysqldump</a></li>
+            <li><a href="#sql_safe_updates">sql_safe_updates</a></li>
+          </ul>
+        </li>
+        <li><a href="#innodb-状态">innodb 状态</a>
+          <ul>
+            <li><a href="#buffer-pool-hit-rate">Buffer pool hit rate</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="查看连接">查看连接</h2>
+<h3 id="show-processlist">show processlist</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> processlist;
+<span style="color:#f92672">+</span><span style="color:#75715e">----+------+-----------+--------------------+---------+------+----------+------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> Id <span style="color:#f92672">|</span> <span style="color:#66d9ef">User</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">Host</span>      <span style="color:#f92672">|</span> db                 <span style="color:#f92672">|</span> Command <span style="color:#f92672">|</span> Time <span style="color:#f92672">|</span> <span style="color:#66d9ef">State</span>    <span style="color:#f92672">|</span> Info             <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">----+------+-----------+--------------------+---------+------+----------+------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> <span style="color:#ae81ff">11</span> <span style="color:#f92672">|</span> root <span style="color:#f92672">|</span> localhost <span style="color:#f92672">|</span> information_schema <span style="color:#f92672">|</span> Sleep   <span style="color:#f92672">|</span> <span style="color:#ae81ff">9886</span> <span style="color:#f92672">|</span>          <span style="color:#f92672">|</span> <span style="color:#66d9ef">NULL</span>             <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> <span style="color:#ae81ff">16</span> <span style="color:#f92672">|</span> root <span style="color:#f92672">|</span> localhost <span style="color:#f92672">|</span> information_schema <span style="color:#f92672">|</span> Sleep   <span style="color:#f92672">|</span> <span style="color:#ae81ff">7874</span> <span style="color:#f92672">|</span>          <span style="color:#f92672">|</span> <span style="color:#66d9ef">NULL</span>             <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> <span style="color:#ae81ff">18</span> <span style="color:#f92672">|</span> root <span style="color:#f92672">|</span> localhost <span style="color:#f92672">|</span> test               <span style="color:#f92672">|</span> Query   <span style="color:#f92672">|</span>    <span style="color:#ae81ff">0</span> <span style="color:#f92672">|</span> starting <span style="color:#f92672">|</span> <span style="color:#66d9ef">show</span> processlist <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">----+------+-----------+--------------------+---------+------+----------+------------------+
+</span><span style="color:#75715e"></span><span style="color:#ae81ff">3</span> <span style="color:#66d9ef">rows</span> <span style="color:#66d9ef">in</span> <span style="color:#66d9ef">set</span> (<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">00</span> sec)
+</code></pre></div><p>每个字段含义参考<a href="https://dev.mysql.com/doc/refman/8.0/en/show-processlist.html">官方文档</a>，具体 state 值的具体含义参考 <a href="https://dev.mysql.com/doc/refman/5.6/en/general-thread-states.html">https://dev.mysql.com/doc/refman/5.6/en/general-thread-states.html</a>。</p>
+<h3 id="innodb_thread_concurrency">innodb_thread_concurrency</h3>
+<p><code>innodb_thread_concurrency</code> 表示 InnoDB 的并发执行的线程上限，达到这个值后，InnoDB 会阻塞新的线程执行，通常将 innodb_thread_concurrency 设置为 64-128 之间的值，因为 CPU 核数有限，防止过多线程频繁地上下文切换。</p>
+<p>注意并发连接和并发线程不同，被同一个锁阻塞的所有线程并发计数为1、sleep 状态的线程不计入并发线程，因为这些线程不占用 CPU。</p>
+<h3 id="长事务">长事务</h3>
+<p>长事务提交之前，它的所有回滚记录都必须保留，会占用大量存储空间。</p>
+<p>同时长事务会一直占用 MDL（metadata lock)。CRUD 和 DDL 都会请求 MDL，如果有长事务长期占用 DML 读锁，如果这时有 DDL 会因为拿不到 DML 的写锁而被阻塞，然后再阻塞这个表的所有 CRUD。</p>
+<p>MySQL 5.6 Online DDL 的过程：</p>
+<ol>
+<li>拿 MDL 写锁</li>
+<li>降级成 MDL 读锁</li>
+<li>真正做 DDL</li>
+<li>升级成 MDL 写锁</li>
+<li>释放 MDL 锁</li>
+</ol>
+<p>1、2、4、5 如果没有锁冲突，执行时间非常短。第 3 步占用了 DDL 绝大部分时间，这期间这个表可以正常读写数据，是因此称为“online”。</p>
+<h4 id="innodb_trx">innodb_trx</h4>
+<p>当前事务在 <code>information_schema.innodb_trx</code> 中。</p>
+<p>查看长事务：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> information_schema.innodb_trx 
+<span style="color:#66d9ef">where</span> TIME_TO_SEC(timediff(now(),trx_started))<span style="color:#f92672">&gt;</span><span style="color:#ae81ff">60</span>;
+</code></pre></div><p>监控 <code>information_schema.innodb_trx</code> 表，设置长事务阈值，超过就报警 / 或者 kill。</p>
+<h4 id="pt-kill">pt-kill</h4>
+<p>也可以使用 <a href="https://www.percona.com/downloads/percona-toolkit/LATEST">Percona Toolkit</a> 的 pt-kill 这个工具。</p>
+<h3 id="查询表锁">查询表锁</h3>
+<p>使用 performance_schema 和 sys 系统库。MySQL 启动时需要设置 performance_schema=on，相比于设置为 off 会有 10% 左右的性能损失。</p>
+<p>例如：
+session 1 持有 MDL 写锁：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">lock</span> <span style="color:#66d9ef">table</span> aa <span style="color:#66d9ef">write</span>;
+</code></pre></div><p>session 2 查询被阻塞：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> aa;
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> processlist;
+<span style="color:#f92672">+</span><span style="color:#75715e">----+------+-----------+------+---------+------+---------------------------------+------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> Id <span style="color:#f92672">|</span> <span style="color:#66d9ef">User</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">Host</span>      <span style="color:#f92672">|</span> db   <span style="color:#f92672">|</span> Command <span style="color:#f92672">|</span> Time <span style="color:#f92672">|</span> <span style="color:#66d9ef">State</span>                           <span style="color:#f92672">|</span> Info             <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">----+------+-----------+------+---------+------+---------------------------------+------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span>  <span style="color:#ae81ff">2</span> <span style="color:#f92672">|</span> root <span style="color:#f92672">|</span> localhost <span style="color:#f92672">|</span> sys  <span style="color:#f92672">|</span> Query   <span style="color:#f92672">|</span>    <span style="color:#ae81ff">0</span> <span style="color:#f92672">|</span> starting                        <span style="color:#f92672">|</span> <span style="color:#66d9ef">show</span> processlist <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span>  <span style="color:#ae81ff">3</span> <span style="color:#f92672">|</span> root <span style="color:#f92672">|</span> localhost <span style="color:#f92672">|</span> test <span style="color:#f92672">|</span> Sleep   <span style="color:#f92672">|</span>   <span style="color:#ae81ff">27</span> <span style="color:#f92672">|</span>                                 <span style="color:#f92672">|</span> <span style="color:#66d9ef">NULL</span>             <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span>  <span style="color:#ae81ff">4</span> <span style="color:#f92672">|</span> root <span style="color:#f92672">|</span> localhost <span style="color:#f92672">|</span> test <span style="color:#f92672">|</span> Query   <span style="color:#f92672">|</span>    <span style="color:#ae81ff">9</span> <span style="color:#f92672">|</span> Waiting <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">table</span> metadata <span style="color:#66d9ef">lock</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> aa <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">----+------+-----------+------+---------+------+---------------------------------+------------------+
+</span></code></pre></div><p>使用<code>show processlist</code>虽然可以看到 query 被 MDL 阻塞，但无法看出是被哪个连接阻塞的，这时需要查看 <code>sys.schema_table_lock_waits</code>表：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> sys.schema_table_lock_waits<span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">G</span>
+<span style="color:#f92672">***************************</span> <span style="color:#ae81ff">1</span>. <span style="color:#66d9ef">row</span> <span style="color:#f92672">***************************</span>
+               object_schema: test
+                 object_name: aa
+           waiting_thread_id: <span style="color:#ae81ff">35</span>
+                 waiting_pid: <span style="color:#ae81ff">10</span>
+             waiting_account: root<span style="color:#f92672">@</span>localhost
+           waiting_lock_type: SHARED_READ
+       waiting_lock_duration: <span style="color:#66d9ef">TRANSACTION</span>
+               waiting_query: <span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> aa
+          waiting_query_secs: <span style="color:#ae81ff">69</span>
+ waiting_query_rows_affected: <span style="color:#ae81ff">0</span>
+ waiting_query_rows_examined: <span style="color:#ae81ff">0</span>
+          blocking_thread_id: <span style="color:#ae81ff">36</span>
+                blocking_pid: <span style="color:#ae81ff">11</span>
+            blocking_account: root<span style="color:#f92672">@</span>localhost
+          blocking_lock_type: SHARED_NO_READ_WRITE
+      blocking_lock_duration: <span style="color:#66d9ef">TRANSACTION</span>
+     sql_kill_blocking_query: KILL QUERY innodb_thread_concurrency11
+sql_kill_blocking_connection: KILL <span style="color:#ae81ff">11</span>
+<span style="color:#ae81ff">1</span> <span style="color:#66d9ef">row</span> <span style="color:#66d9ef">in</span> <span style="color:#66d9ef">set</span> (<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">00</span> sec)
+</code></pre></div><p>注意如果查不到值，需要设置，具体可以参考 <a href="https://dev.mysql.com/doc/refman/8.0/en/performance-schema-metadata-locks-table.html">https://dev.mysql.com/doc/refman/8.0/en/performance-schema-metadata-locks-table.html</a></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">UPDATE</span> performance_schema.setup_instruments
+<span style="color:#66d9ef">SET</span> ENABLED <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;YES&#39;</span>, TIMED <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;YES&#39;</span>
+<span style="color:#66d9ef">WHERE</span> NAME <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;wait/lock/metadata/sql/mdl&#39;</span>;
+</code></pre></div><h3 id="查询行锁">查询行锁</h3>
+<p>session 1：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">begin</span>;
+<span style="color:#66d9ef">update</span> aa <span style="color:#66d9ef">set</span> value <span style="color:#f92672">=</span> <span style="color:#ae81ff">89998</span> <span style="color:#66d9ef">where</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</code></pre></div><p>session 2：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> aa <span style="color:#66d9ef">where</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">lock</span> <span style="color:#66d9ef">in</span> <span style="color:#66d9ef">share</span> <span style="color:#66d9ef">mode</span>;
+</code></pre></div><p>这时要查询 <code>sys.innodb_lock_waits</code> 找到占用锁的线程。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> sys.innodb_lock_waits<span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">G</span>
+<span style="color:#f92672">***************************</span> <span style="color:#ae81ff">1</span>. <span style="color:#66d9ef">row</span> <span style="color:#f92672">***************************</span>
+                wait_started: <span style="color:#ae81ff">2020</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">23</span> <span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">40</span>:<span style="color:#ae81ff">31</span>
+                    wait_age: <span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">50</span>
+               wait_age_secs: <span style="color:#ae81ff">50</span>
+                locked_table: <span style="color:#f92672">`</span>test<span style="color:#f92672">`</span>.<span style="color:#f92672">`</span>aa<span style="color:#f92672">`</span>
+                locked_index: GEN_CLUST_INDEX
+                 locked_type: RECORD
+              waiting_trx_id: <span style="color:#ae81ff">421141623197328</span>
+         waiting_trx_started: <span style="color:#ae81ff">2020</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">23</span> <span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">40</span>:<span style="color:#ae81ff">31</span>
+             waiting_trx_age: <span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">50</span>
+     waiting_trx_rows_locked: <span style="color:#ae81ff">1</span>
+   waiting_trx_rows_modified: <span style="color:#ae81ff">0</span>
+                 waiting_pid: <span style="color:#ae81ff">13</span>
+               waiting_query: <span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> aa <span style="color:#66d9ef">where</span> id <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span> <span style="color:#66d9ef">lock</span> <span style="color:#66d9ef">in</span> <span style="color:#66d9ef">share</span> <span style="color:#66d9ef">mode</span>
+             waiting_lock_id: <span style="color:#ae81ff">421141623197328</span>:<span style="color:#ae81ff">27</span>:<span style="color:#ae81ff">3</span>:<span style="color:#ae81ff">2</span>
+           waiting_lock_mode: S
+             blocking_trx_id: <span style="color:#ae81ff">108294</span>
+                blocking_pid: <span style="color:#ae81ff">12</span>
+              blocking_query: <span style="color:#66d9ef">NULL</span>
+            blocking_lock_id: <span style="color:#ae81ff">108294</span>:<span style="color:#ae81ff">27</span>:<span style="color:#ae81ff">3</span>:<span style="color:#ae81ff">2</span>
+          blocking_lock_mode: X
+        blocking_trx_started: <span style="color:#ae81ff">2020</span><span style="color:#f92672">-</span><span style="color:#ae81ff">12</span><span style="color:#f92672">-</span><span style="color:#ae81ff">23</span> <span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">38</span>:<span style="color:#ae81ff">33</span>
+            blocking_trx_age: <span style="color:#ae81ff">00</span>:<span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">48</span>
+    blocking_trx_rows_locked: <span style="color:#ae81ff">2</span>
+  blocking_trx_rows_modified: <span style="color:#ae81ff">1</span>
+     sql_kill_blocking_query: KILL QUERY <span style="color:#ae81ff">12</span>
+sql_kill_blocking_connection: KILL <span style="color:#ae81ff">12</span>
+</code></pre></div><h2 id="日志">日志</h2>
+<h3 id="general_log">general_log</h3>
+<p>general_log 中记录了所有 sql 语句，一般线上不开启。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#e6db74">&#39;general_log&#39;</span>;  <span style="color:#75715e">-- 查看日志是否开启
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#e6db74">&#39;log_output&#39;</span>;  <span style="color:#75715e">-- 看看日志输出类型: table 或 file
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#e6db74">&#39;general_log_file&#39;</span>;  <span style="color:#75715e">-- 看看日志文件保存位置
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">set</span> <span style="color:#66d9ef">global</span> general_log_file<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;tmp/general.lg&#39;</span>; <span style="color:#75715e">-- 设置日志文件保存位置
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">set</span> <span style="color:#66d9ef">global</span> general_log<span style="color:#f92672">=</span><span style="color:#66d9ef">on</span>; <span style="color:#75715e">-- 开启日志功能
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">set</span> <span style="color:#66d9ef">global</span> log_output<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;table&#39;</span>;
+<span style="color:#66d9ef">set</span> <span style="color:#66d9ef">global</span> log_output<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;file&#39;</span>;
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo tail -f /var/lib/mysql/catplanet.log
+2020-12-13T09:49:50.048364Z        <span style="color:#ae81ff">18</span> Connect   root@localhost on  using Socket
+2020-12-13T09:49:50.048760Z        <span style="color:#ae81ff">18</span> Query     <span style="color:#66d9ef">select</span> @@version_comment limit <span style="color:#ae81ff">1</span>
+2020-12-13T09:50:04.330063Z        <span style="color:#ae81ff">18</span> Query     show databases
+2020-12-13T09:50:15.759175Z        <span style="color:#ae81ff">18</span> Query     SELECT DATABASE<span style="color:#f92672">()</span>
+2020-12-13T09:50:15.759288Z        <span style="color:#ae81ff">18</span> Init DB   test
+2020-12-13T09:50:15.760041Z        <span style="color:#ae81ff">18</span> Query     show databases
+2020-12-13T09:50:15.760297Z        <span style="color:#ae81ff">18</span> Query     show tables
+2020-12-13T09:50:15.760403Z        <span style="color:#ae81ff">18</span> Field List        aa
+2020-12-13T09:50:17.026075Z        <span style="color:#ae81ff">18</span> Query     <span style="color:#66d9ef">select</span> * from aa
+2020-12-13T09:50:24.913874Z        <span style="color:#ae81ff">18</span> Query     insert into aa set id <span style="color:#f92672">=</span> <span style="color:#ae81ff">12345</span>
+</code></pre></div><h3 id="slow_log">slow_log</h3>
+<p>相关设置：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#e6db74">&#39;%slow%&#39;</span>;
+<span style="color:#f92672">+</span><span style="color:#75715e">---------------------------+-----------------------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> Variable_name             <span style="color:#f92672">|</span> Value                             <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">---------------------------+-----------------------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> log_slow_admin_statements <span style="color:#f92672">|</span> <span style="color:#66d9ef">OFF</span>                               <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> log_slow_slave_statements <span style="color:#f92672">|</span> <span style="color:#66d9ef">OFF</span>                               <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> slow_launch_time          <span style="color:#f92672">|</span> <span style="color:#ae81ff">2</span>                                 <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> slow_query_log            <span style="color:#f92672">|</span> <span style="color:#66d9ef">OFF</span>                               <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> slow_query_log_file       <span style="color:#f92672">|</span> <span style="color:#f92672">/</span>var<span style="color:#f92672">/</span>lib<span style="color:#f92672">/</span>mysql<span style="color:#f92672">/</span>catplanet<span style="color:#f92672">-</span>slow.log <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">---------------------------+-----------------------------------+
+</span></code></pre></div><p>还有 <code>long_query_time</code> 设置了慢查询时间。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#e6db74">&#39;long_query_time&#39;</span>;
+<span style="color:#f92672">+</span><span style="color:#75715e">-----------------+-----------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> Variable_name   <span style="color:#f92672">|</span> Value     <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">-----------------+-----------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> long_query_time <span style="color:#f92672">|</span> <span style="color:#ae81ff">10</span>.<span style="color:#ae81ff">000000</span> <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">-----------------+-----------+
+</span></code></pre></div><p><code>log_queries_not_using_indexes</code> 为 ON 是表示未经过索引的查询也记录到 slow_log 中。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> variables <span style="color:#66d9ef">like</span> <span style="color:#e6db74">&#39;log_queries_not_using_indexes&#39;</span>;
+<span style="color:#f92672">+</span><span style="color:#75715e">-------------------------------+-------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> Variable_name                 <span style="color:#f92672">|</span> Value <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">-------------------------------+-------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> log_queries_not_using_indexes <span style="color:#f92672">|</span> <span style="color:#66d9ef">OFF</span>   <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">-------------------------------+-------+
+</span></code></pre></div><h3 id="查看-binlog">查看 binlog</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> binlog events <span style="color:#66d9ef">in</span> <span style="color:#e6db74">&#39;mysql-bin.000001&#39;</span>;
+<span style="color:#f92672">+</span><span style="color:#75715e">------------------+-----+----------------+-----------+-------------+--------------------------------------------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> Log_name         <span style="color:#f92672">|</span> Pos <span style="color:#f92672">|</span> Event_type     <span style="color:#f92672">|</span> Server_id <span style="color:#f92672">|</span> End_log_pos <span style="color:#f92672">|</span> Info                                                   <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">------------------+-----+----------------+-----------+-------------+--------------------------------------------------------+
+</span><span style="color:#75715e"></span><span style="color:#f92672">|</span> mysql<span style="color:#f92672">-</span>bin.<span style="color:#ae81ff">000001</span> <span style="color:#f92672">|</span> <span style="color:#ae81ff">154</span> <span style="color:#f92672">|</span> Anonymous_Gtid <span style="color:#f92672">|</span>         <span style="color:#ae81ff">1</span> <span style="color:#f92672">|</span>         <span style="color:#ae81ff">219</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">SET</span> <span style="color:#f92672">@@</span><span style="color:#66d9ef">SESSION</span>.GTID_NEXT<span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;ANONYMOUS&#39;</span>                   <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> mysql<span style="color:#f92672">-</span>bin.<span style="color:#ae81ff">000001</span> <span style="color:#f92672">|</span> <span style="color:#ae81ff">219</span> <span style="color:#f92672">|</span> Query          <span style="color:#f92672">|</span>         <span style="color:#ae81ff">1</span> <span style="color:#f92672">|</span>         <span style="color:#ae81ff">299</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">BEGIN</span>                                                  <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> mysql<span style="color:#f92672">-</span>bin.<span style="color:#ae81ff">000001</span> <span style="color:#f92672">|</span> <span style="color:#ae81ff">299</span> <span style="color:#f92672">|</span> Table_map      <span style="color:#f92672">|</span>         <span style="color:#ae81ff">1</span> <span style="color:#f92672">|</span>         <span style="color:#ae81ff">346</span> <span style="color:#f92672">|</span> table_id: <span style="color:#ae81ff">109</span> (test.t)                                 <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> mysql<span style="color:#f92672">-</span>bin.<span style="color:#ae81ff">000001</span> <span style="color:#f92672">|</span> <span style="color:#ae81ff">346</span> <span style="color:#f92672">|</span> Write_rows     <span style="color:#f92672">|</span>         <span style="color:#ae81ff">1</span> <span style="color:#f92672">|</span>         <span style="color:#ae81ff">394</span> <span style="color:#f92672">|</span> table_id: <span style="color:#ae81ff">109</span> flags: STMT_END_F                        <span style="color:#f92672">|</span>
+<span style="color:#f92672">|</span> mysql<span style="color:#f92672">-</span>bin.<span style="color:#ae81ff">000001</span> <span style="color:#f92672">|</span> <span style="color:#ae81ff">394</span> <span style="color:#f92672">|</span> Xid            <span style="color:#f92672">|</span>         <span style="color:#ae81ff">1</span> <span style="color:#f92672">|</span>         <span style="color:#ae81ff">425</span> <span style="color:#f92672">|</span> <span style="color:#66d9ef">COMMIT</span> <span style="color:#75715e">/* xid=18 */</span>                                    <span style="color:#f92672">|</span>
+<span style="color:#f92672">+</span><span style="color:#75715e">------------------+-----+----------------+-----------+-------------+--------------------------------------------------------+
+</span></code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo mysqlbinlog -vv /var/log/mysql/mysql-bin.000001
+BEGIN
+/*!*/;
+<span style="color:#75715e"># at 299</span>
+<span style="color:#75715e">#210102 10:24:02 server id 1  end_log_pos 346 CRC32 0x0e5a4b31  Table_map: `test`.`t` mapped to number 109</span>
+<span style="color:#75715e"># at 346</span>
+<span style="color:#75715e">#210102 10:24:02 server id 1  end_log_pos 394 CRC32 0x137f70ff  Write_rows: table id 109 flags: STMT_END_F</span>
+
+BINLOG <span style="color:#e6db74">&#39;
+</span><span style="color:#e6db74">QtnvXxMBAAAALwAAAFoBAAAAAG0AAAAAAAEABHRlc3QAAXQAAwMDEQEAAjFLWg4=
+</span><span style="color:#e6db74">QtnvXx4BAAAAMAAAAIoBAAAAAG0AAAAAAAEAAgAD//gGAAAABgAAAF41oID/cH8T
+</span><span style="color:#e6db74">&#39;</span>/*!*/;
+<span style="color:#75715e">### INSERT INTO `test`.`t`</span>
+<span style="color:#75715e">### SET</span>
+<span style="color:#75715e">###   @1=6 /* INT meta=0 nullable=0 is_null=0 */</span>
+<span style="color:#75715e">###   @2=6 /* INT meta=0 nullable=1 is_null=0 */</span>
+<span style="color:#75715e">###   @3=1580572800 /* TIMESTAMP(0) meta=0 nullable=0 is_null=0 */</span>
+<span style="color:#75715e"># at 394</span>
+<span style="color:#75715e">#210102 10:24:02 server id 1  end_log_pos 425 CRC32 0xd8a728ce  Xid = 18</span>
+COMMIT/*!*/;
+SET @@SESSION.GTID_NEXT<span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;AUTOMATIC&#39;</span> /* added by mysqlbinlog */ /*!*/;
+</code></pre></div><h3 id="回滚数据">回滚数据</h3>
+<p>基于 ROW 格式的 binlog， <a href="https://mariadb.com/kb/en/flashback">https://mariadb.com/kb/en/flashback</a> 可以回滚数据。</p>
+<h3 id="监控-binlogredo-log-io-耗时">监控 binlog/redo log IO 耗时</h3>
+<p>统计 redo log IO耗时。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">select</span> <span style="color:#f92672">*</span> <span style="color:#66d9ef">from</span> performance_schema.file_summary_by_event_name 
+<span style="color:#66d9ef">where</span> event_name <span style="color:#66d9ef">like</span> <span style="color:#e6db74">&#39;wait/io/file/innodb/innodb_log_file&#39;</span><span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">G</span>
+<span style="color:#f92672">***************************</span> <span style="color:#ae81ff">1</span>. <span style="color:#66d9ef">row</span> <span style="color:#f92672">***************************</span>
+               EVENT_NAME: wait<span style="color:#f92672">/</span>io<span style="color:#f92672">/</span>file<span style="color:#f92672">/</span>innodb<span style="color:#f92672">/</span>innodb_log_file
+               COUNT_STAR: <span style="color:#ae81ff">21</span>           <span style="color:#75715e">-- IO 总次数
+</span><span style="color:#75715e"></span>           SUM_TIMER_WAIT: <span style="color:#ae81ff">18280881192</span>  <span style="color:#75715e">-- 总计耗时，单位 10^-12 秒
+</span><span style="color:#75715e"></span>           MIN_TIMER_WAIT: <span style="color:#ae81ff">667968</span>
+           AVG_TIMER_WAIT: <span style="color:#ae81ff">870518124</span>    <span style="color:#75715e">-- 平均耗时，例如这个是 870518124 / 1000^3 = 0.87 毫秒
+</span><span style="color:#75715e"></span>           MAX_TIMER_WAIT: <span style="color:#ae81ff">4605078996</span>
+               COUNT_READ: <span style="color:#ae81ff">7</span>            <span style="color:#75715e">-- 读 IO 总次数
+</span><span style="color:#75715e"></span>           SUM_TIMER_READ: <span style="color:#ae81ff">5538290268</span>
+           MIN_TIMER_READ: <span style="color:#ae81ff">667968</span>
+           AVG_TIMER_READ: <span style="color:#ae81ff">791184282</span>
+           MAX_TIMER_READ: <span style="color:#ae81ff">4605078996</span>
+ SUM_NUMBER_OF_BYTES_READ: <span style="color:#ae81ff">70144</span>
+              COUNT_WRITE: <span style="color:#ae81ff">4</span>            <span style="color:#75715e">-- 写 IO 总次数
+</span><span style="color:#75715e"></span>          SUM_TIMER_WRITE: <span style="color:#ae81ff">87470880</span>
+          MIN_TIMER_WRITE: <span style="color:#ae81ff">11174940</span>
+          AVG_TIMER_WRITE: <span style="color:#ae81ff">21867720</span>
+          MAX_TIMER_WRITE: <span style="color:#ae81ff">33588324</span>
+SUM_NUMBER_OF_BYTES_WRITE: <span style="color:#ae81ff">2048</span>
+               COUNT_MISC: <span style="color:#ae81ff">10</span>            <span style="color:#75715e">-- fsync 总次数
+</span><span style="color:#75715e"></span>           SUM_TIMER_MISC: <span style="color:#ae81ff">12655120044</span>
+           MIN_TIMER_MISC: <span style="color:#ae81ff">770280</span>
+           AVG_TIMER_MISC: <span style="color:#ae81ff">1265511828</span>    <span style="color:#75715e">-- 平均耗时，例如这个是 1265511828 / 1000^3 = 1.27 毫秒
+</span><span style="color:#75715e"></span>           MAX_TIMER_MISC: <span style="color:#ae81ff">4312570164</span>
+</code></pre></div><p>统计 binlog IO耗时可以使用 <code>file_summary_by_event_name</code> 表中 <code>event_name = &quot;wait/io/file/sql/binlog&quot;</code> 这一行，其各个字段和 redo log 统计字段含义一样。</p>
+<p>使用这个语句监控超过 200 毫秒的 IO。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> event_name, MAX_TIMER_WAIT
+<span style="color:#66d9ef">FROM</span> performance_schema.file_summary_by_event_name
+<span style="color:#66d9ef">WHERE</span> event_name <span style="color:#66d9ef">IN</span> (
+  <span style="color:#e6db74">&#39;wait/io/file/innodb/innodb_log_file&#39;</span>,
+  <span style="color:#e6db74">&#39;wait/io/file/sql/binlog&#39;</span>
+) <span style="color:#66d9ef">AND</span> MAX_TIMER_WAIT <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">200</span><span style="color:#f92672">*</span><span style="color:#ae81ff">1000000000</span>;
+</code></pre></div><p>每次发现异常后，使用 <code>truncate table performance_schema.file_summary_by_event_name;</code>清空统计，然后继续统计。</p>
+<h3 id="查看主备延迟">查看主备延迟</h3>
+<p>Seconds_Behind_Master 即主备延迟，单位秒。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> slave status<span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">G</span>
+<span style="color:#f92672">***************************</span> <span style="color:#ae81ff">1</span>. <span style="color:#66d9ef">row</span> <span style="color:#f92672">***************************</span>
+               Slave_IO_State: Waiting <span style="color:#66d9ef">for</span> master <span style="color:#66d9ef">to</span> send event
+                  Master_Host: <span style="color:#ae81ff">172</span>.<span style="color:#ae81ff">18</span>.<span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">3</span>
+                  Master_User: root
+                  Master_Port: <span style="color:#ae81ff">3306</span>
+                Connect_Retry: <span style="color:#ae81ff">60</span>
+              Master_Log_File: mysql<span style="color:#f92672">-</span>bin.<span style="color:#ae81ff">000003</span>
+          Read_Master_Log_Pos: <span style="color:#ae81ff">1270</span>
+               Relay_Log_File: aca42f5f012a<span style="color:#f92672">-</span>relay<span style="color:#f92672">-</span>bin.<span style="color:#ae81ff">000004</span>
+                Relay_Log_Pos: <span style="color:#ae81ff">1483</span>
+        Relay_Master_Log_File: mysql<span style="color:#f92672">-</span>bin.<span style="color:#ae81ff">000003</span>
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+              Replicate_Do_DB:
+          Replicate_Ignore_DB:
+           Replicate_Do_Table:
+       Replicate_Ignore_Table:
+      Replicate_Wild_Do_Table:
+  Replicate_Wild_Ignore_Table:
+                   Last_Errno: <span style="color:#ae81ff">0</span>
+                   Last_Error:
+                 Skip_Counter: <span style="color:#ae81ff">0</span>
+          Exec_Master_Log_Pos: <span style="color:#ae81ff">1270</span>
+              Relay_Log_Space: <span style="color:#ae81ff">3076400</span>
+              Until_Condition: <span style="color:#66d9ef">None</span>
+               Until_Log_File:
+                Until_Log_Pos: <span style="color:#ae81ff">0</span>
+           Master_SSL_Allowed: <span style="color:#66d9ef">No</span>
+           Master_SSL_CA_File:
+           Master_SSL_CA_Path:
+              Master_SSL_Cert:
+            Master_SSL_Cipher:
+               Master_SSL_Key:
+        Seconds_Behind_Master: <span style="color:#ae81ff">0</span>
+Master_SSL_Verify_Server_Cert: <span style="color:#66d9ef">No</span>
+                Last_IO_Errno: <span style="color:#ae81ff">0</span>
+                Last_IO_Error:
+               Last_SQL_Errno: <span style="color:#ae81ff">0</span>
+               Last_SQL_Error:
+  Replicate_Ignore_Server_Ids:
+             Master_Server_Id: <span style="color:#ae81ff">1</span>
+                  Master_UUID: <span style="color:#ae81ff">066</span>c671c<span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>cce<span style="color:#f92672">-</span><span style="color:#ae81ff">11</span>eb<span style="color:#f92672">-</span><span style="color:#ae81ff">9</span>b2d<span style="color:#f92672">-</span><span style="color:#ae81ff">0242</span>ac110002
+             Master_Info_File: <span style="color:#f92672">/</span>var<span style="color:#f92672">/</span>lib<span style="color:#f92672">/</span>mysql<span style="color:#f92672">/</span>master.info
+                    SQL_Delay: <span style="color:#ae81ff">0</span>
+          SQL_Remaining_Delay: <span style="color:#66d9ef">NULL</span>
+      Slave_SQL_Running_State: Slave has <span style="color:#66d9ef">read</span> <span style="color:#66d9ef">all</span> relay log; waiting <span style="color:#66d9ef">for</span> <span style="color:#66d9ef">more</span> updates
+           Master_Retry_Count: <span style="color:#ae81ff">86400</span>
+                  Master_Bind:
+      Last_IO_Error_Timestamp:
+     Last_SQL_Error_Timestamp:
+               Master_SSL_Crl:
+           Master_SSL_Crlpath:
+           Retrieved_Gtid_Set: <span style="color:#ae81ff">066</span>c671c<span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>cce<span style="color:#f92672">-</span><span style="color:#ae81ff">11</span>eb<span style="color:#f92672">-</span><span style="color:#ae81ff">9</span>b2d<span style="color:#f92672">-</span><span style="color:#ae81ff">0242</span>ac110002:<span style="color:#ae81ff">1</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span>
+            Executed_Gtid_Set: <span style="color:#ae81ff">066</span>c671c<span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>cce<span style="color:#f92672">-</span><span style="color:#ae81ff">11</span>eb<span style="color:#f92672">-</span><span style="color:#ae81ff">9</span>b2d<span style="color:#f92672">-</span><span style="color:#ae81ff">0242</span>ac110002:<span style="color:#ae81ff">1</span><span style="color:#f92672">-</span><span style="color:#ae81ff">10</span>,
+<span style="color:#ae81ff">09</span>a6661b<span style="color:#f92672">-</span><span style="color:#ae81ff">4</span>cce<span style="color:#f92672">-</span><span style="color:#ae81ff">11</span>eb<span style="color:#f92672">-</span>b074<span style="color:#f92672">-</span><span style="color:#ae81ff">0242</span>ac110003:<span style="color:#ae81ff">1</span><span style="color:#f92672">-</span><span style="color:#ae81ff">6</span>
+                Auto_Position: <span style="color:#ae81ff">0</span>
+         Replicate_Rewrite_DB:
+                 Channel_Name:
+</code></pre></div><h3 id="mysqldump">mysqldump</h3>
+<ul>
+<li><code>-d, -–no-data</code>: 表示不导出数据，只导出表结构。</li>
+<li><code>--set-gtid-purged</code>: 表示 binlog 中是否<strong>不记录 GTID</strong>。<code>OFF</code>表示记录gtid，<code>ON</code>表示不记录gtid。如果用 GTID 做了主从，就需要设置这个值为<code>OFF</code>，否则主上恢复数据时从库无法同步。</li>
+<li><code>--single-transaction</code>: 导数据前开启一个事务，保证拿到一致性视图。注意只针对 InnoDB 这种实现了可重复读的引擎。如果 dump 同时有 DDL 可能会报错 <em>Table definition has changed, please retry transaction</em>，因为 mysqldump 拿到表结构但还未 dump 数据前，DDL 如果改表，那么再 dump 数据就会报错。</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># 导出数据</span>
+mysqldump -uroot -p --set-gtid-purged<span style="color:#f92672">=</span>OFF database table1 table2 &gt; mysqldump.sql
+<span style="color:#75715e"># 只导出数据库表结构</span>
+mysqldump -uroot -p --set-gtid-purged<span style="color:#f92672">=</span>OFF -d database table1 table2 &gt; mysqldump.sql
+<span style="color:#75715e"># 导出所有数据库</span>
+mysqldump -uroot -p --set-gtid-purged<span style="color:#f92672">=</span>OFF --all-databases &gt; mysqldump.sql
+<span style="color:#75715e"># 导出指定几个数据库</span>
+mysqldump -uroot -p --set-gtid-purged<span style="color:#f92672">=</span>OFF --databases db1 db2 &gt; mysqldump.sql
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># 导入表</span>
+mysql -uroot -p database &lt; mysqldump.sql
+<span style="color:#75715e"># 导入数据库</span>
+mysql -uroot -p &lt; mysqldump.sql
+</code></pre></div><h3 id="sql_safe_updates">sql_safe_updates</h3>
+<p>设置 sql_safe_updates 为 on，预防 delete/update 语句忘记写 where 条件，或者 where 条件中没有包含索引字段。</p>
+<h2 id="innodb-状态">innodb 状态</h2>
+<p><code>show engine innodb status</code> 会列出以下方面信息：</p>
+<ul>
+<li>background thread</li>
+<li>semaphores</li>
+<li>Latest detected Deadlock</li>
+<li>transactions</li>
+<li>file i/o</li>
+<li>insert buffer and adaptive hash index</li>
+<li>log</li>
+<li>buffer pool and memory</li>
+<li>individual buffer pool info</li>
+<li>Row operations</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">show</span> engine innodb status<span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">G</span>
+<span style="color:#f92672">***************************</span> <span style="color:#ae81ff">1</span>. <span style="color:#66d9ef">row</span> <span style="color:#f92672">***************************</span>
+  <span style="color:#66d9ef">Type</span>: InnoDB
+  Name: 
+Status: 
+<span style="color:#f92672">=====================================</span>
+<span style="color:#ae81ff">2021</span><span style="color:#f92672">-</span><span style="color:#ae81ff">01</span><span style="color:#f92672">-</span><span style="color:#ae81ff">02</span> <span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">54</span>:<span style="color:#ae81ff">59</span> <span style="color:#ae81ff">0</span>x7f0b24057700 INNODB MONITOR <span style="color:#66d9ef">OUTPUT</span>
+<span style="color:#f92672">=====================================</span>
+Per <span style="color:#66d9ef">second</span> averages calculated <span style="color:#66d9ef">from</span> the <span style="color:#66d9ef">last</span> <span style="color:#ae81ff">8</span> seconds
+<span style="color:#75715e">-----------------
+</span><span style="color:#75715e"></span>BACKGROUND THREAD
+<span style="color:#75715e">-----------------
+</span><span style="color:#75715e"></span>srv_master_thread loops: <span style="color:#ae81ff">5</span> srv_active, <span style="color:#ae81ff">0</span> srv_shutdown, <span style="color:#ae81ff">23541</span> srv_idle
+srv_master_thread log flush <span style="color:#66d9ef">and</span> writes: <span style="color:#ae81ff">23546</span>
+<span style="color:#75715e">----------
+</span><span style="color:#75715e"></span>SEMAPHORES
+<span style="color:#75715e">----------
+</span><span style="color:#75715e"></span>OS WAIT ARRAY INFO: reservation <span style="color:#66d9ef">count</span> <span style="color:#ae81ff">6</span>
+OS WAIT ARRAY INFO: signal <span style="color:#66d9ef">count</span> <span style="color:#ae81ff">6</span>
+RW<span style="color:#f92672">-</span>shared spins <span style="color:#ae81ff">0</span>, rounds <span style="color:#ae81ff">12</span>, OS waits <span style="color:#ae81ff">6</span>
+RW<span style="color:#f92672">-</span>excl spins <span style="color:#ae81ff">0</span>, rounds <span style="color:#ae81ff">0</span>, OS waits <span style="color:#ae81ff">0</span>
+RW<span style="color:#f92672">-</span>sx spins <span style="color:#ae81ff">0</span>, rounds <span style="color:#ae81ff">0</span>, OS waits <span style="color:#ae81ff">0</span>
+Spin rounds per wait: <span style="color:#ae81ff">12</span>.<span style="color:#ae81ff">00</span> RW<span style="color:#f92672">-</span>shared, <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">00</span> RW<span style="color:#f92672">-</span>excl, <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">00</span> RW<span style="color:#f92672">-</span>sx
+<span style="color:#75715e">------------
+</span><span style="color:#75715e"></span>TRANSACTIONS
+<span style="color:#75715e">------------
+</span><span style="color:#75715e"></span>Trx id counter <span style="color:#ae81ff">115978</span>
+Purge done <span style="color:#66d9ef">for</span> trx<span style="color:#e6db74">&#39;s n:o &lt; 0 undo n:o &lt; 0 state: running but idle
+</span><span style="color:#e6db74">History list length 0
+</span><span style="color:#e6db74">LIST OF TRANSACTIONS FOR EACH SESSION:
+</span><span style="color:#e6db74">---TRANSACTION 421161130347256, not started
+</span><span style="color:#e6db74">0 lock struct(s), heap size 1136, 0 row lock(s)
+</span><span style="color:#e6db74">---TRANSACTION 421161130346336, not started
+</span><span style="color:#e6db74">0 lock struct(s), heap size 1136, 0 row lock(s)
+</span><span style="color:#e6db74">---TRANSACTION 115976, ACTIVE 581 sec
+</span><span style="color:#e6db74">2 lock struct(s), heap size 1136, 2 row lock(s), undo log entries 1
+</span><span style="color:#e6db74">MySQL thread id 22, OS thread handle 139685697177344, query id 91 localhost root
+</span><span style="color:#e6db74">--------
+</span><span style="color:#e6db74">FILE I/O
+</span><span style="color:#e6db74">--------
+</span><span style="color:#e6db74">I/O thread 0 state: waiting for completed aio requests (insert buffer thread)
+</span><span style="color:#e6db74">I/O thread 1 state: waiting for completed aio requests (log thread)
+</span><span style="color:#e6db74">I/O thread 2 state: waiting for completed aio requests (read thread)
+</span><span style="color:#e6db74">I/O thread 3 state: waiting for completed aio requests (read thread)
+</span><span style="color:#e6db74">I/O thread 4 state: waiting for completed aio requests (read thread)
+</span><span style="color:#e6db74">I/O thread 5 state: waiting for completed aio requests (read thread)
+</span><span style="color:#e6db74">I/O thread 6 state: waiting for completed aio requests (write thread)
+</span><span style="color:#e6db74">I/O thread 7 state: waiting for completed aio requests (write thread)
+</span><span style="color:#e6db74">I/O thread 8 state: waiting for completed aio requests (write thread)
+</span><span style="color:#e6db74">I/O thread 9 state: waiting for completed aio requests (write thread)
+</span><span style="color:#e6db74">Pending normal aio reads: [0, 0, 0, 0] , aio writes: [0, 0, 0, 0] ,
+</span><span style="color:#e6db74"> ibuf aio reads:, log i/o&#39;</span>s:, sync i<span style="color:#f92672">/</span>o<span style="color:#e6db74">&#39;s:
+</span><span style="color:#e6db74">Pending flushes (fsync) log: 0; buffer pool: 0
+</span><span style="color:#e6db74">358 OS file reads, 79 OS file writes, 24 OS fsyncs
+</span><span style="color:#e6db74">0.00 reads/s, 0 avg bytes/read, 0.00 writes/s, 0.00 fsyncs/s
+</span><span style="color:#e6db74">-------------------------------------
+</span><span style="color:#e6db74">INSERT BUFFER AND ADAPTIVE HASH INDEX
+</span><span style="color:#e6db74">-------------------------------------
+</span><span style="color:#e6db74">Ibuf: size 1, free list len 0, seg size 2, 0 merges
+</span><span style="color:#e6db74">merged operations:
+</span><span style="color:#e6db74"> insert 0, delete mark 0, delete 0
+</span><span style="color:#e6db74">discarded operations:
+</span><span style="color:#e6db74"> insert 0, delete mark 0, delete 0
+</span><span style="color:#e6db74">Hash table size 34673, node heap has 0 buffer(s)
+</span><span style="color:#e6db74">Hash table size 34673, node heap has 0 buffer(s)
+</span><span style="color:#e6db74">Hash table size 34673, node heap has 0 buffer(s)
+</span><span style="color:#e6db74">Hash table size 34673, node heap has 0 buffer(s)
+</span><span style="color:#e6db74">Hash table size 34673, node heap has 0 buffer(s)
+</span><span style="color:#e6db74">Hash table size 34673, node heap has 0 buffer(s)
+</span><span style="color:#e6db74">Hash table size 34673, node heap has 0 buffer(s)
+</span><span style="color:#e6db74">Hash table size 34673, node heap has 0 buffer(s)
+</span><span style="color:#e6db74">0.00 hash searches/s, 0.00 non-hash searches/s
+</span><span style="color:#e6db74">---
+</span><span style="color:#e6db74">LOG
+</span><span style="color:#e6db74">---
+</span><span style="color:#e6db74">Log sequence number 19793397
+</span><span style="color:#e6db74">Log flushed up to   19793397
+</span><span style="color:#e6db74">Pages flushed up to 19793397
+</span><span style="color:#e6db74">Last checkpoint at  19793388
+</span><span style="color:#e6db74">0 pending log flushes, 0 pending chkp writes
+</span><span style="color:#e6db74">21 log i/o&#39;</span>s done, <span style="color:#ae81ff">0</span>.<span style="color:#ae81ff">00</span> log i<span style="color:#f92672">/</span>o<span style="color:#e6db74">&#39;s/second
+</span><span style="color:#e6db74">----------------------
+</span><span style="color:#e6db74">BUFFER POOL AND MEMORY
+</span><span style="color:#e6db74">----------------------
+</span><span style="color:#e6db74">Total large memory allocated 137428992
+</span><span style="color:#e6db74">Dictionary memory allocated 143952
+</span><span style="color:#e6db74">Buffer pool size   8191
+</span><span style="color:#e6db74">Free buffers       7830
+</span><span style="color:#e6db74">Database pages     361
+</span><span style="color:#e6db74">Old database pages 0
+</span><span style="color:#e6db74">Modified db pages  0
+</span><span style="color:#e6db74">Pending reads      0
+</span><span style="color:#e6db74">Pending writes: LRU 0, flush list 0, single page 0
+</span><span style="color:#e6db74">Pages made young 0, not young 0
+</span><span style="color:#e6db74">0.00 youngs/s, 0.00 non-youngs/s
+</span><span style="color:#e6db74">Pages read 326, created 35, written 49
+</span><span style="color:#e6db74">0.00 reads/s, 0.00 creates/s, 0.00 writes/s
+</span><span style="color:#e6db74">Buffer pool hit rate 1000 / 1000, young-making rate 0 / 1000 not 0 / 1000         -- 内存命中率
+</span><span style="color:#e6db74">Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+</span><span style="color:#e6db74">LRU len: 361, unzip_LRU len: 0
+</span><span style="color:#e6db74">I/O sum[0]:cur[0], unzip sum[0]:cur[0]
+</span><span style="color:#e6db74">--------------
+</span><span style="color:#e6db74">ROW OPERATIONS
+</span><span style="color:#e6db74">--------------
+</span><span style="color:#e6db74">0 queries inside InnoDB, 0 queries in queue
+</span><span style="color:#e6db74">0 read views open inside InnoDB
+</span><span style="color:#e6db74">Process ID=9915, Main thread ID=139685853976320, state: sleeping
+</span><span style="color:#e6db74">Number of rows inserted 6, updated 1, deleted 0, read 32
+</span><span style="color:#e6db74">0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.75 reads/s
+</span><span style="color:#e6db74">----------------------------
+</span><span style="color:#e6db74">END OF INNODB MONITOR OUTPUT
+</span><span style="color:#e6db74">============================
+</span></code></pre></div><h3 id="buffer-pool-hit-rate">Buffer pool hit rate</h3>
+<p>Buffer pool hit rate 表示 Buffer Pool 命中率。通常一个稳定服务的线上系统，要保证响应时间符合要求的话，内存命中率要在 99% 以上。参数 innodb_buffer_pool_size 确定的，一般建议设置成可用物理内存的 60%~80%。</p>
+
+    </div>
+
+    
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/blog/images/wechat-qr-code.jpg">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/blog/images/alipay-qr-code.jpg">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/blog/tags/mysql/">mysql</a>
+          <a href="/blog/tags/observability/">observability</a>
+          </div>
+      <nav class="post-nav">
+        
+        <a class="next" href="/blog/post/tech/redis/learning-redis/">
+            <span class="next-text nav-default">redis 学习笔记</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="comments-gitment"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitment.browser.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitment = new Gitment({
+        id: '2021-01-02 19:54:07 \u002b0800 CST',
+        title: '学习观测 MySQL',
+        link: decodeURI(location.href),
+        desc: '查看连接 show processlist show processlist; \u002b----\u002b------\u002b-----------\u002b--------------------\u002b---------\u002b------\u002b----------\u002b------------------\u002b | Id | User | Host | db | Command | Time | State | Info | \u002b----\u002b------\u002b-----------\u002b--------------------\u002b---------\u002b------\u002b----------\u002b------------------\u002b | 11 | root | localhost | information_schema | Sleep | 9886 | | NULL | | 16 | root | localhost | information_schema | Sleep | 7874 | | NULL | | 18 | root | localhost | test | Query |',
+        owner: 'catplanet007',
+        repo: 'blog-comment',
+        oauth: {
+          client_id: 'd5440e3be89b6b3961fc',
+          client_secret: '3ff905d980b9f9cc05a8d7064a9fafeb55f6ecb7'
+        }
+      });
+      gitment.render('comments-gitment');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/imsun/gitment">comments powered by gitment.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/catplanet007" class="iconfont icon-github" title="github"></a>
+  <a href="https://catplanet007.github.io/blog/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>catplanet007</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script src="/blog/lib/highlight/highlight.pack.js?v=20171001"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/blog/js/main.min.a0842702715c4a1f2265c518e265651b7b00f5a4f8db649cf5fd983d8dff44d1.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-185363435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script id="baidu_push">
+  (function(){
+    if (window.location.hostname === 'localhost') return;
+    var bp = document.createElement('script'); bp.async = true;
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+      bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+      bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>

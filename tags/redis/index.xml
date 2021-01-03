@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>redis on 峡谷见闻</title>
+    <link>https://catplanet007.github.io/blog/tags/redis/</link>
+    <description>Recent content in redis on 峡谷见闻</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>catplanet007</copyright>
+    <lastBuildDate>Sun, 29 Nov 2020 23:23:42 +0800</lastBuildDate><atom:link href="https://catplanet007.github.io/blog/tags/redis/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>redis 学习笔记</title>
+      <link>https://catplanet007.github.io/blog/post/tech/redis/learning-redis/</link>
+      <pubDate>Sun, 29 Nov 2020 23:23:42 +0800</pubDate>
+      
+      <guid>https://catplanet007.github.io/blog/post/tech/redis/learning-redis/</guid>
+      <description>5 种基本数据结构 访问数据都是 K-V 形式，所以这里说的数据类型都是说值的类型。然而运行时 key 是可变的，所谓的 string 用起来更像 map，所谓的 hash 类型用起来更</description>
+    </item>
+    
+  </channel>
+</rss>

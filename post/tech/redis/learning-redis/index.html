@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>redis 学习笔记 - 峡谷见闻</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="catplanet007" /><meta name="description" content="5 种基本数据结构 访问数据都是 K-V 形式，所以这里说的数据类型都是说值的类型。然而运行时 key 是可变的，所谓的 string 用起来更像 map，所谓的 hash 类型用起来更" /><meta name="keywords" content="redis" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.79.0 with theme even" />
+
+
+<link rel="canonical" href="https://catplanet007.github.io/blog/post/tech/redis/learning-redis/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/blog/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/blog/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/blog/favicon-16x16.png">
+<link rel="manifest" href="/blog/manifest.json">
+<link rel="mask-icon" href="/blog/safari-pinned-tab.svg" color="#5bbad5">
+
+
+
+<link href="/blog/sass/main.min.127436e17cd800e3778a1c040e72bfaaefd2ca14d76b1f70851ccf9b631264e8.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+<link rel="stylesheet" href="/blog/css/custom.css">
+
+
+<meta property="og:title" content="redis 学习笔记" />
+<meta property="og:description" content="5 种基本数据结构 访问数据都是 K-V 形式，所以这里说的数据类型都是说值的类型。然而运行时 key 是可变的，所谓的 string 用起来更像 map，所谓的 hash 类型用起来更" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://catplanet007.github.io/blog/post/tech/redis/learning-redis/" />
+<meta property="article:published_time" content="2020-11-29T23:23:42+08:00" />
+<meta property="article:modified_time" content="2020-11-29T23:23:42+08:00" />
+<meta itemprop="name" content="redis 学习笔记">
+<meta itemprop="description" content="5 种基本数据结构 访问数据都是 K-V 形式，所以这里说的数据类型都是说值的类型。然而运行时 key 是可变的，所谓的 string 用起来更像 map，所谓的 hash 类型用起来更">
+<meta itemprop="datePublished" content="2020-11-29T23:23:42+08:00" />
+<meta itemprop="dateModified" content="2020-11-29T23:23:42+08:00" />
+<meta itemprop="wordCount" content="3344">
+
+
+
+<meta itemprop="keywords" content="redis," />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="redis 学习笔记"/>
+<meta name="twitter:description" content="5 种基本数据结构 访问数据都是 K-V 形式，所以这里说的数据类型都是说值的类型。然而运行时 key 是可变的，所谓的 string 用起来更像 map，所谓的 hash 类型用起来更"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/blog/" class="logo">峡谷见闻</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/blog/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/blog/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/blog/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/blog/categories/">
+        <li class="mobile-menu-item">Categories</li>
+      </a>
+  </ul>
+</nav>
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/blog/" class="logo">峡谷见闻</a>
+</div>
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/blog/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/blog/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/blog/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/blog/categories/">Categories</a>
+      </li>
+  </ul>
+</nav>
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">redis 学习笔记</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2020-11-29 </span>
+        <div class="post-category">
+            <a href="/blog/categories/redis/"> redis </a>
+            </div>
+          <span class="more-meta"> 约 3344 字 </span>
+          <span class="more-meta"> 预计阅读 7 分钟 </span>
+        
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#5-种基本数据结构">5 种基本数据结构</a>
+          <ul>
+            <li><a href="#string">string</a></li>
+            <li><a href="#list">list</a></li>
+            <li><a href="#hash">hash</a></li>
+            <li><a href="#set">set</a></li>
+            <li><a href="#zset">zset</a></li>
+          </ul>
+        </li>
+        <li><a href="#持久化">持久化</a>
+          <ul>
+            <li><a href="#rdb">RDB</a></li>
+            <li><a href="#aofappend-only-file">AOF（Append Only File）</a></li>
+            <li><a href="#混合持久化">混合持久化</a></li>
+          </ul>
+        </li>
+        <li><a href="#key-过期策略">key 过期策略</a></li>
+        <li><a href="#可观测性">可观测性</a>
+          <ul>
+            <li><a href="#info-命令">info 命令</a></li>
+            <li><a href="#slowlog">slowlog</a></li>
+            <li><a href="#latency">latency</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <h2 id="5-种基本数据结构">5 种基本数据结构</h2>
+<p>访问数据都是 <strong>K-V</strong> 形式，所以这里说的数据类型都是说<strong>值</strong>的类型。然而运行时 key 是可变的，所谓的 <strong>string</strong> 用起来更像 <strong>map</strong>，所谓的 <strong>hash</strong> 类型用起来更像双层的 <strong>map</strong>。</p>
+<p>所以如果用代码调用 <strong>redis</strong>，可以是这样：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-typescript" data-lang="typescript"><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">key</span>: <span style="color:#66d9ef">string</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`user:name:1234`</span>
+<span style="color:#a6e22e">redis</span>[<span style="color:#a6e22e">key</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Jack&#39;</span> <span style="color:#75715e">// set user:name:1234 Jack
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">userName</span>: <span style="color:#66d9ef">string</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">redis</span>[<span style="color:#a6e22e">key</span>] <span style="color:#75715e">// get user:name:1234
+</span><span style="color:#75715e"></span>
+<span style="color:#a6e22e">key</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`user:1234`</span>
+<span style="color:#a6e22e">redis</span>[<span style="color:#a6e22e">key</span>] <span style="color:#f92672">=</span> {<span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Jack&#39;</span>} <span style="color:#75715e">// hset user:1234 name Jack
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">userName</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">redis</span>[<span style="color:#a6e22e">key</span>].<span style="color:#a6e22e">name</span> <span style="color:#75715e">// hget user:1234 name
+</span></code></pre></div><p>而绝对不能是这样：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-typescript" data-lang="typescript"><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">userName1234</span>: <span style="color:#66d9ef">string</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Jack&#39;</span> <span style="color:#75715e">// set user:name:1234 Jack
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">let</span> <span style="color:#a6e22e">userName</span>: <span style="color:#66d9ef">string</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">userName1234</span> <span style="color:#75715e">// get user:name:1234
+</span><span style="color:#75715e"></span>
+<span style="color:#66d9ef">type</span> <span style="color:#a6e22e">hash</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">Record</span>&lt;<span style="color:#f92672">string</span><span style="color:#960050;background-color:#1e0010">,</span> <span style="color:#a6e22e">string</span>&gt;
+<span style="color:#66d9ef">let</span> <span style="color:#a6e22e">user1234</span>: <span style="color:#66d9ef">hash</span> <span style="color:#f92672">=</span> {<span style="color:#a6e22e">name</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;Jack&#39;</span>} <span style="color:#75715e">// hset user:1234 name Jack
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">userName</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">user1234</span>.<span style="color:#a6e22e">name</span> <span style="color:#75715e">// hget user:1234 name
+</span></code></pre></div><h3 id="string">string</h3>
+<p><strong>string</strong> 是变长的，会预先分配 <strong>capacity</strong>，最大长度 512M。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; set name Jack
+OK
+&gt; get name
+<span style="color:#e6db74">&#34;Jack&#34;</span>
+&gt; del name
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span> <span style="color:#75715e"># 1: succeed</span>
+&gt; get name
+<span style="color:#f92672">(</span>nil<span style="color:#f92672">)</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; set name Jack
+OK
+&gt; expire name <span style="color:#ae81ff">60</span> <span style="color:#75715e"># 60s</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
+&gt; ttl name
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">50</span>  <span style="color:#75715e"># 50s to live，-1: hasn&#39;t set expire, -2: value not exist</span>
+</code></pre></div><h4 id="分布式锁">分布式锁</h4>
+<p><a href="http://www.redis.cn/commands/set.html">set</a> 命令提供的语意 <code>func(key1 string, key2 string, expireInMilliseconds number, ifNotExist boolean) boolean</code>可以用来实现分布式锁：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; set lock:user:123 xx-random-123 px <span style="color:#ae81ff">10000</span> nx <span style="color:#75715e"># 设置 10s 失效时间</span>
+OK
+&gt; set lock:user:123 xx-random-123 px <span style="color:#ae81ff">10000</span> nx
+<span style="color:#f92672">(</span>nil<span style="color:#f92672">)</span> <span style="color:#75715e"># 如果 key 已存在，不更新</span>
+&gt; ttl lock:user:123
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">7</span>
+</code></pre></div><p>整个指令是原子的，保证了加锁安全，超时失效保证了分布式场景下不发生死锁。</p>
+<p>随机数 value 是为了支持释放锁安全，释放锁需要使用 <strong>deleteIfValueEqual</strong> 语意，遗憾的是 redis 没有提供这样的原子命令，需要使用 Lua 脚本实现：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-lua" data-lang="lua"><span style="color:#66d9ef">if</span> redis.call(<span style="color:#e6db74">&#34;get&#34;</span>,KEYS[<span style="color:#ae81ff">1</span>]) <span style="color:#f92672">==</span> ARGV[<span style="color:#ae81ff">1</span>] <span style="color:#66d9ef">then</span>
+    <span style="color:#66d9ef">return</span> redis.call(<span style="color:#e6db74">&#34;del&#34;</span>,KEYS[<span style="color:#ae81ff">1</span>])
+<span style="color:#66d9ef">else</span>
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>
+<span style="color:#66d9ef">end</span>
+</code></pre></div><p>这种方式只能针对单实例的 redis，如果 redis 变成主从结构，由于 redis 主从同步通常是异步的，锁不再安全。对于 redis 集群，我们可以使用 <a href="http://www.redis.cn/topics/distlock.html">Redlock 算法</a>，只有从超过一半的节点成功设置 key 才算加锁成功。</p>
+<h3 id="list">list</h3>
+<p>实现采用双向链表，所以优先使用 <code>push</code>/<code>pop</code>，少用下标访问。</p>
+<p>元素较少时使用 <strong>ziplist</strong>，一块连续的内存存储；元素教多时使用 <strong>quicklist</strong>，即将多个 <strong>ziplist</strong> 连起来的链表。这样避免了多个 <code>next/pre</code> 指针对内存的消耗。</p>
+<p><img src="./quicklist.svg" alt="quicklist"></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; rpush myList aaa
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span> <span style="color:#75715e"># [&#34;aaa&#34;]</span>
+&gt; rpush myList bbb ccc ddd
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">4</span> <span style="color:#75715e"># [&#34;aaa&#34;, &#34;bbb&#34;, &#34;ccc&#34;, &#34;ddd&#34;]</span>
+&gt; lpush myList xxx yyy
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">6</span> <span style="color:#75715e"># [&#34;yyy&#34;, &#34;xxx&#34;, &#34;aaa&#34;, &#34;bbb&#34;, &#34;ccc&#34;, &#34;ddd&#34;]</span>
+&gt; lpop myList
+<span style="color:#e6db74">&#34;yyy&#34;</span>
+&gt; lpop myList
+<span style="color:#e6db74">&#34;xxx&#34;</span>
+&gt; lpop myList
+<span style="color:#e6db74">&#34;aaa&#34;</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; llen myList
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">3</span>
+&gt; lindex myList <span style="color:#ae81ff">1</span> <span style="color:#75715e"># 从 0 开始</span>
+<span style="color:#e6db74">&#34;ccc&#34;</span>
+&gt; lrange myList <span style="color:#ae81ff">0</span> <span style="color:#ae81ff">0</span> <span style="color:#75715e"># [left, right]</span>
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;bbb&#34;</span>
+&gt; lrange myList <span style="color:#ae81ff">0</span> -1
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;bbb&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;ccc&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;ddd&#34;</span>
+&gt; lset myList <span style="color:#ae81ff">1</span> ccc2 <span style="color:#75715e"># 修改元素</span>
+OK
+&gt; lrange myList <span style="color:#ae81ff">0</span> -1
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;bbb&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;ccc2&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;ddd&#34;</span>
+&gt; lrem myList <span style="color:#ae81ff">1</span> ccc2 <span style="color:#75715e"># 删除值为指定值的前 count 个元素</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
+</code></pre></div><h3 id="hash">hash</h3>
+<p>无序字典，实现采用数组+链表，hash 到数组发生碰撞时使用链表。值只能是字符串。rehash 是渐进式的，保留新旧两个 hash 结构，查询时会同时查询两个 hash 结构，直到最后将旧 hash 的内容都迁移到新的 hash 结构中才会删除旧 hash。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; hset myHash k1 v1
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
+&gt; hset myHash k2 v2 k3 v3 <span style="color:#75715e"># 单次设置多个 key</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">2</span>
+&gt; hget myHash k1
+<span style="color:#e6db74">&#34;v1&#34;</span>
+&gt; hmget myHash k1 k2
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v2&#34;</span>
+&gt; hgetall myHash
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;k1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;k2&#34;</span>
+4<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v2&#34;</span>
+5<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;k3&#34;</span>
+6<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v3&#34;</span>
+&gt; hkeys myHash
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;k1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;k2&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;k3&#34;</span>
+&gt; hvals myHash
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v2&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v3&#34;</span>
+&gt; hdel myHash k1 k3 <span style="color:#75715e"># 支持同时删除多个 key</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">2</span>
+</code></pre></div><h3 id="set">set</h3>
+<p>无序集合，实现和 <strong>hash</strong> 一样，只不过 <strong>value</strong> 都是 <code>null</code>。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; sadd mySet v1 v2 v3
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">3</span>
+&gt; smembers mySet
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v3&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v2&#34;</span>
+&gt; scard mySet <span style="color:#75715e"># 查看集合大小</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">3</span>
+&gt; srandmember mySet <span style="color:#ae81ff">2</span> <span style="color:#75715e"># 随机获取 2 个元素，默认为1，超过集合大小只返回全部元素</span>
+<span style="color:#e6db74">&#34;v3&#34;</span>
+&gt; srem mySet v1 v2
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">2</span>
+&gt; spop mySet <span style="color:#75715e"># 随机删除一个元素</span>
+<span style="color:#e6db74">&#34;v3&#34;</span>
+</code></pre></div><h3 id="zset">zset</h3>
+<p>加权 Set，按照权重 <strong>score</strong> 排序。实现采用 <strong>hash</strong> + <strong>skiplist</strong>。</p>
+<p>zset 支持的是 <strong>(key, score, idx)</strong> 三元组的互相访问，首先是个有序 Map，元素顺序是 score 从小到大的顺序，其次支持根据 score/idx 范围取 key。</p>
+<ul>
+<li>根据 key 访问，用 <strong>hash</strong> 实现
+<ul>
+<li><a href="http://www.redis.cn/commands/zscore.html">zscore</a>：<code>func(key) score</code></li>
+<li><a href="http://www.redis.cn/commands/zrank.html">zrank</a>：<code>func(key) idx</code></li>
+</ul>
+</li>
+<li>根据 score 访问，用 <strong>skiplist</strong> 实现
+<ul>
+<li><a href="http://www.redis.cn/commands/zrangebyscore.html">zrangebyscore</a>：<code>func(minScore, maxScore) []&lt;key,score&gt;</code></li>
+</ul>
+</li>
+<li>根据 idx 访问，用稍加修改的 <strong>skiplist</strong> 来实现
+<ul>
+<li><a href="http://www.redis.cn/commands/zrange.html">zrange</a>：<code>func(minIdx, maxIdx) []&lt;key,score&gt;</code></li>
+<li><a href="http://www.redis.cn/commands/zrevrange.html">zrevrange</a>：<code>func(minIdx, maxIdx) []&lt;key,score&gt;</code></li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; zadd myZset <span style="color:#ae81ff">1</span> v1
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
+&gt; zadd myZset <span style="color:#ae81ff">2</span> v2
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
+&gt; zadd myZset <span style="color:#ae81ff">3</span> v3
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
+&gt; zrange myZset <span style="color:#ae81ff">0</span> -1 <span style="color:#75715e"># 按 score 顺序输出</span>
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v2&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v3&#34;</span>
+&gt; zrevrange myZset <span style="color:#ae81ff">0</span> -1 <span style="color:#75715e"># 按 score 逆序输出</span>
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v3&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v2&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+&gt; zcard myZset <span style="color:#75715e"># len(myZset)</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">3</span>
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; zadd myZset 4.44 v4
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
+&gt; zscore myZset v4 <span style="color:#75715e"># 根据 key 获取 score</span>
+<span style="color:#e6db74">&#34;4.4400000000000004&#34;</span>
+&gt; zrank myZset v4 <span style="color:#75715e"># 获取 key 对应的排名，从 0 开始计算</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">3</span>
+&gt; zrangebyscore myZset <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2</span> <span style="color:#75715e"># 根据 score 闭区间获取 key</span>
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v2&#34;</span>
+&gt; zrangebyscore myZset -inf <span style="color:#ae81ff">3</span> withscores <span style="color:#75715e"># 遍历(-∞, 8.91]返回 key 和 score</span>
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;1&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v2&#34;</span>
+4<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;2&#34;</span>
+5<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v3&#34;</span>
+6<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;3&#34;</span>
+&gt; zrem myZset v2 <span style="color:#75715e"># 删除 key</span>
+<span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1</span>
+&gt; zrange myZset <span style="color:#ae81ff">0</span> -1
+1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v1&#34;</span>
+2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v3&#34;</span>
+3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;v4&#34;</span>
+</code></pre></div><h4 id="skiplist">skiplist</h4>
+<p>zset 支持随机写入，所以不能用数组。随机写入可以考虑用链表，但是如何确认从哪个节点写入呢？可以使用 skiplist，其查找在哪个节点写入的过程类似二分查找。</p>
+<p>skiplist 结构很好理解，就是多条链表组合起来：</p>
+<ol>
+<li>所有节点按照 score 大小组成一条单向链表，称之为第1层链表</li>
+<li>维持第1层链表结构不变，从中随机挑选50%节点，这些节点组成一条新的单向链表，称之为第2层链表</li>
+<li>维持第2层链表结构不变，从中随机挑选50%节点，这些节点组成一条新的单向链表，称之为第3层链表</li>
+<li>以此类推，直到我们设定的最大一层，例如 redis 中是64层</li>
+</ol>
+<p>这样最后会组成这样一个结构：</p>
+<p><img src="./skiplist.svg" alt="skiplist"></p>
+<p>需要注意的是图中“节点35”看似有多个，其实只有一个，在内存中也只有一个地址，只不过它隶属多个链表。</p>
+<p>假设现在要插入“节点80”，查找插入位置就和寄快递一样：</p>
+<ul>
+<li>先查国家（第5层链表），发现 80 &gt; 60，所以 insertAt ∈ (80, TAIL)</li>
+<li>再查省市（第4层链表），发现 80 &gt; 60，所以 insertAt ∈ (80, TAIL)</li>
+<li>再查区（第3层链表），发现 80 &lt; 91，所以 insertAt ∈ (80, 91)</li>
+<li>再查街道（第2层链表），发现 80 &gt; 75，所以 insertAt ∈ (75, 91)</li>
+<li>再查门牌号码（第1层链表），发现 80 &lt; 83，所以 insertAt ∈ (75, 83)，也就是插入到“节点75”后面</li>
+</ul>
+<p>找到插入位置，如何确定“节点80”属于几层链表呢？这里还是采用相同方式，首先新节点必然属于第一层，然后每想晋升1层，都要抛一下硬币，通过才能晋升，只要晋升成功就可以一直晋升，直到晋升失败或者晋升到最高层为止。插入新节点并不影响旧节点的层数，只需要将前后节点的指针重新指向一下就行了，可以看到统计上插入性能不依赖节点插入顺序。</p>
+<p>理解了 skiplist 的原理后，我们可以去 <a href="https://leetcode-cn.com/problems/design-skiplist/">leetcode 设计跳跃表问题</a> 实现一下过把瘾了，毕竟有人提前帮你写好了单元测试了😉</p>
+<p>skiplist 插入的平均复杂度是 <em>O(log n)</em>，详细的推导过程可以参考论文 <a href="https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf">Skip Lists: A Probabilistic Alternative to Balanced Trees</a>。</p>
+<p>redis 中实现的 skiplist 稍微有些区别，例如上面我们一直把晋升概率设置为50%，redis 中采用的是25%；redis 中 skiplist 维护了每个节点和上个节点的距离，用来实现 zrank，该命令的时间复杂度也是 <em>O(log n)</em>；此外第1层链表是双向链表，用来实现反向遍历。</p>
+<h2 id="持久化">持久化</h2>
+<h3 id="rdb">RDB</h3>
+<ul>
+<li>支持将当前内存中数据 dump 到硬盘中为 dump.rdb 文件，可以使用 <a href="https://github.com/sripathikrishnan/redis-rdb-tools">redis-rdb-tools</a> 查看其中内容</li>
+<li>支持指定时间间隔定期保存 snapshot</li>
+<li>保存 RDB 文件时会 fork 一个子进程，IO 操作全在子进程内做，由 linux 的写时复制（copy-on-write）机制保证数据是 <a href="http://www.redis.cn/commands/save.html">save</a> 命令那一刻的数据</li>
+<li>与 AOF，恢复大量数据时，RDB 方式更快</li>
+<li>由于是定期保存，所以 RDB 方式可能丢失最近几分钟数据</li>
+</ul>
+<h3 id="aofappend-only-file">AOF（Append Only File）</h3>
+<ul>
+<li>AOF 日志中是 reids 服务器按顺序的所有写操作指令录制。</li>
+<li>每条写操作指令会被追加到 <code>aof_buf</code> 中，默认每隔1s执行一次 <code>fsync</code> 将数据写入 AOF 文件，崩溃后最多丢失1s的数据。</li>
+</ul>
+<h3 id="混合持久化">混合持久化</h3>
+<p>redis 4.0 以后支持了 RDB 和增量 AOF 文件存在一起，久远历史数据存 RDB，最近数据用存 AOF。</p>
+<h2 id="key-过期策略">key 过期策略</h2>
+<p>redis 有2种方式让删除过期 key：<strong>定期删除</strong>和<strong>惰性删除</strong>。</p>
+<p>redis 会定期（每秒10次）扫描删除过期的 key</p>
+<ol>
+<li>随机取 20 个 key</li>
+<li>删除 20 个 key 中过期的 key</li>
+<li>如果这 20 个 key 中过期 key 占比 &gt; 25%（5 个），那么重复步骤 1</li>
+</ol>
+<p>有了这个策略，通常不会有超过 25% 的过期 key。同时为了防止过度占用 cpu，限制单次扫描时间不超过 25ms。如果同时有大量 key 同时过期，大量 key 同时回收会导致处理读写请求有延迟。所以如果有大批量 key 过期，要给过期时间一个随机范围，不要都在同一个时间内过期。</p>
+<p>同时为了保证准确，还有惰性删除，访问 key 时检查 key 是否过期需要删除。</p>
+<p>当某个 key 通过上述策略被删除时，redis 会同时向 AOF 中加入一条 <a href="http://www.redis.cn/commands/del.html">del</a> 语句。</p>
+<h2 id="可观测性">可观测性</h2>
+<h3 id="info-命令">info 命令</h3>
+<p><a href="http://www.redis.cn/commands/info.html">info</a> 命令可以帮助我们了解 redis 服务器的运行状态。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell"><span style="color:#75715e"># operations per second，每秒多少次指令</span>
+$ redis-cli info stats | grep ops
+instantaneous_ops_per_sec:789
+
+<span style="color:#75715e"># 当前连接的客户端数</span>
+$ redis-cli info clients | grep connect
+connected_clients:2
+
+<span style="color:#75715e"># 内存占用</span>
+$ redis-cli info memory | grep used | grep human
+used_memory_human:841.13K <span style="color:#75715e"># 内存分配器 (jemalloc) 从操作系统分配的内存总量</span>
+used_memory_rss_human:3.90M  <span style="color:#75715e"># 操作系统看到的内存占用，top 命令看到的内存</span>
+used_memory_peak_human:842.16K  <span style="color:#75715e"># redis 内存消耗的峰值</span>
+used_memory_lua_human:37.00K <span style="color:#75715e"># lua 脚本引擎占用的内存大小</span>
+
+<span style="color:#75715e"># 主从复制的积压缓冲区大小</span>
+$ redis-cli info replication | grep backlog
+repl_backlog_active:0
+repl_backlog_size:1048576 <span style="color:#75715e"># 积压缓冲区大小</span>
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0https://github.com/sripathikrishnan/redis-rdb-tools
+</code></pre></div><h3 id="slowlog">slowlog</h3>
+<p>redis 记录了执行时间超过给定时长的命令请求。
+redis 提供了2个配置：</p>
+<ul>
+<li><code>slowlog-log-slower-than</code>：命令执行时间（不包括排队时间）超过该时间时会被记录下来，单位为微秒。</li>
+<li><code>slowlog-max-len</code>：可以记录的慢查询命令的总数。</li>
+</ul>
+<p>通过 <a href="http://www.redis.cn/commands/slowlog.html">slowlog</a> 命令可以查看慢查询：</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">&gt; slowlog get <span style="color:#ae81ff">2</span>
+1<span style="color:#f92672">)</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">14</span> <span style="color:#75715e"># 慢查询自增 id</span>
+   2<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1309448221</span> <span style="color:#75715e"># 慢查询执行 unix 时间</span>
+   3<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">15</span> <span style="color:#75715e"># 耗时微秒</span>
+   4<span style="color:#f92672">)</span> 1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;ping&#34;</span>
+2<span style="color:#f92672">)</span> 1<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">13</span>
+   2<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">1309448128</span>
+   3<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>integer<span style="color:#f92672">)</span> <span style="color:#ae81ff">30</span>
+   4<span style="color:#f92672">)</span> 1<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;slowlog&#34;</span>
+      2<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;get&#34;</span>
+      3<span style="color:#f92672">)</span> <span style="color:#e6db74">&#34;100&#34;</span>
+&gt; slowlog reset <span style="color:#75715e"># 清空慢查询</span>
+</code></pre></div><h3 id="latency">latency</h3>
+<p>这里的 latency 指客户端的，通过 &ndash;latency 可以查看客户端延迟。</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">$ redis-cli --latency
+min: 0, max: 1, avg: 0.19 <span style="color:#f92672">(</span><span style="color:#ae81ff">187</span> samples<span style="color:#f92672">)</span>
+</code></pre></div><p>关于如何排查高 latency 可以参考 <a href="https://redis.io/topics/latency">Redis latency problems troubleshooting</a>，这里有<a href="https://www.oschina.net/translate/redis-latency-problems-troubleshooting?lang=chs&amp;p=1">中文版</a>。</p>
+
+    </div>
+
+    
+<div class="post-reward">
+  <input type="checkbox" name="reward" id="reward" hidden />
+  <label class="reward-button" for="reward">赞赏支持</label>
+  <div class="qr-code">
+    
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/blog/images/wechat-qr-code.jpg">
+        <span>微信打赏</span>
+      </label>
+    <label class="qr-code-image" for="reward">
+        <img class="image" src="/blog/images/alipay-qr-code.jpg">
+        <span>支付宝打赏</span>
+      </label>
+  </div>
+</div><footer class="post-footer">
+      <div class="post-tags">
+          <a href="/blog/tags/redis/">redis</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/blog/post/tech/mysql/mysql-observability/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">学习观测 MySQL</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        
+      </nav>
+    </footer>
+  </article>
+        </div>
+        <div id="comments-gitment"></div>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/default.min.css" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/gh/theme-next/theme-next-gitment@1/gitment.browser.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      var gitment = new Gitment({
+        id: '2020-11-29 23:23:42 \u002b0800 CST',
+        title: 'redis 学习笔记',
+        link: decodeURI(location.href),
+        desc: '5 种基本数据结构 访问数据都是 K-V 形式，所以这里说的数据类型都是说值的类型。然而运行时 key 是可变的，所谓的 string 用起来更像 map，所谓的 hash 类型用起来更',
+        owner: 'catplanet007',
+        repo: 'blog-comment',
+        oauth: {
+          client_id: 'd5440e3be89b6b3961fc',
+          client_secret: '3ff905d980b9f9cc05a8d7064a9fafeb55f6ecb7'
+        }
+      });
+      gitment.render('comments-gitment');
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://github.com/imsun/gitment">comments powered by gitment.</a></noscript>
+
+  
+
+  
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="https://github.com/catplanet007" class="iconfont icon-github" title="github"></a>
+  <a href="https://catplanet007.github.io/blog/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  <span class="power-by">
+    由 <a class="hexo-link" href="https://gohugo.io">Hugo</a> 强力驱动
+  </span>
+  <span class="division">|</span>
+  <span class="theme-info">
+    主题 - 
+    <a class="theme-link" href="https://github.com/olOwOlo/hugo-theme-even">Even</a>
+  </span>
+
+  
+
+  <span class="copyright-year">
+    &copy; 
+    2017 - 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>catplanet007</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  <script src="/blog/lib/highlight/highlight.pack.js?v=20171001"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/blog/js/main.min.a0842702715c4a1f2265c518e265651b7b00f5a4f8db649cf5fd983d8dff44d1.js"></script>
+  <script type="text/javascript">
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.5/es5/tex-mml-chtml.js" integrity="sha256-HGLuEfFcsUJGhvB8cQ8nr0gai9EucOOaIxFw7qxmd+w=" crossorigin="anonymous"></script>
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-185363435-1', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+<script id="baidu_push">
+  (function(){
+    if (window.location.hostname === 'localhost') return;
+    var bp = document.createElement('script'); bp.async = true;
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+      bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+    }
+    else {
+      bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+  })();
+</script>
+
+
+
+
+</body>
+</html>

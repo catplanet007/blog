@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>mysql on 峡谷见闻</title>
+    <link>https://catplanet007.github.io/blog/tags/mysql/</link>
+    <description>Recent content in mysql on 峡谷见闻</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>catplanet007</copyright>
+    <lastBuildDate>Sat, 02 Jan 2021 19:54:07 +0800</lastBuildDate><atom:link href="https://catplanet007.github.io/blog/tags/mysql/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>学习观测 MySQL</title>
+      <link>https://catplanet007.github.io/blog/post/tech/mysql/mysql-observability/</link>
+      <pubDate>Sat, 02 Jan 2021 19:54:07 +0800</pubDate>
+      
+      <guid>https://catplanet007.github.io/blog/post/tech/mysql/mysql-observability/</guid>
+      <description>查看连接 show processlist show processlist; +----+------+-----------+--------------------+---------+------+----------+------------------+ | Id | User | Host | db | Command | Time | State | Info | +----+------+-----------+--------------------+---------+------+----------+------------------+ | 11 | root | localhost | information_schema | Sleep | 9886 | | NULL | | 16 | root | localhost | information_schema | Sleep | 7874 | | NULL | | 18 | root | localhost | test | Query |</description>
+    </item>
+    
+  </channel>
+</rss>
