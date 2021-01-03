@@ -1,85 +1,85 @@
-<?xml-stylesheet type="text/xsl" href="https://catplanet007.github.io/blog/sitemap.xsl"?>
+<?xml-stylesheet type="text/xsl" href="https://catplanet007.gitee.io/blog/sitemap.xsl"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://catplanet007.github.io/blog/categories/</loc>
+    <loc>https://catplanet007.gitee.io/blog/categories/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/tags/mysql/</loc>
+    <loc>https://catplanet007.gitee.io/blog/tags/mysql/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/categories/mysql/</loc>
+    <loc>https://catplanet007.gitee.io/blog/categories/mysql/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/tags/observability/</loc>
+    <loc>https://catplanet007.gitee.io/blog/tags/observability/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/categories/observability/</loc>
+    <loc>https://catplanet007.gitee.io/blog/categories/observability/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/post/</loc>
+    <loc>https://catplanet007.gitee.io/blog/post/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/tags/</loc>
+    <loc>https://catplanet007.gitee.io/blog/tags/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/post/tech/mysql/mysql-observability/</loc>
+    <loc>https://catplanet007.gitee.io/blog/post/tech/mysql/mysql-observability/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/</loc>
+    <loc>https://catplanet007.gitee.io/blog/</loc>
     <lastmod>2021-01-02T19:54:07+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/tags/redis/</loc>
+    <loc>https://catplanet007.gitee.io/blog/tags/redis/</loc>
     <lastmod>2020-11-29T23:23:42+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/categories/redis/</loc>
+    <loc>https://catplanet007.gitee.io/blog/categories/redis/</loc>
     <lastmod>2020-11-29T23:23:42+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   
   <url>
-    <loc>https://catplanet007.github.io/blog/post/tech/redis/learning-redis/</loc>
+    <loc>https://catplanet007.gitee.io/blog/post/tech/redis/learning-redis/</loc>
     <lastmod>2020-11-29T23:23:42+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
